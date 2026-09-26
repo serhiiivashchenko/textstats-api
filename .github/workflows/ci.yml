@@ -1,0 +1,9 @@
+TextStats.Api/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── Services/
+├── Program.cs
+├── Dockerfile
+├── TextStats.Api.csproj
+└── ...
