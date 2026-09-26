@@ -5,10 +5,15 @@ public class TextAnalyzer : ITextAnalyzer
         var words = text
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .Length;
+        
+        var sentences = text
+        .Split(['.', '!', '?'], StringSplitOptions.RemoveEmptyEntries)
+        .Length;    
 
         return new AnalyzeResponse(
             Characters: text.Length,
-            Words: words
+            Words: words,
+            Sentences:sentences
         );
     }
 }

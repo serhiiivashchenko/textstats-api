@@ -24,5 +24,6 @@ record AnalyzeRequest(string Text);
 
 public record AnalyzeResponse(
     int Characters,
-    int Words
+    int Words,
+    int Sentences
 );
