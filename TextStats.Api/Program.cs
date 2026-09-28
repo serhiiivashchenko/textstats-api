@@ -1,4 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
+
+var textStatsApiKey = builder.Configuration["TEXTSTATS_API_KEY"] 
+    ?? throw new InvalidOperationException("TEXTSTATS_API_KEY is not configured.");
+
 builder.Services.AddScoped<ITextAnalyzer, TextAnalyzer>();
 
 builder.Services.AddHttpClient<ITextImprover, OpenAITextImprover>(client =>
@@ -24,20 +28,43 @@ app.MapPost("/api/analyze", (
 app.MapPost("/api/improve", async (
     HttpRequest httpRequest,
     ImproveRequest request,
-    ITextImprover improver,
-    IConfiguration configuration) =>
+    ITextImprover improver) =>
 {
-    var expectedApiKey = configuration["TEXTSTATS_API_KEY"];
     var providedApiKey = httpRequest.Headers["X-Api-Key"].FirstOrDefault();
+    if(providedApiKey!=textStatsApiKey) return Results.Unauthorized();
 
-    if(providedApiKey!=expectedApiKey) return Results.Unauthorized();
-   
-    var improved = await improver.ImproveTextAsync(request.Text);
-    return Results.Ok(new
+    if (string.IsNullOrWhiteSpace(request.Text))
         {
-            original = request.Text,
-            improved
+        return Results.BadRequest(new
+        {
+            error = "Text must not be empty."
         });
+    }
+
+    if (request.Text.Length > 2000)
+    {
+        return Results.BadRequest(new
+        {
+            error = $"Text must not exceed 2000 characters. Received: {request.Text.Length}."
+        });
+    }
+
+    try
+    {
+        var improved = await improver.ImproveTextAsync(request.Text);
+            return Results.Ok(new
+            {
+                original = request.Text,
+                improved
+            });
+    }
+    catch(ExternalServiceException)
+    {
+        return Results.Problem(
+            statusCode: StatusCodes.Status502BadGateway,
+            title: "Text improvement service is temporarily unavailable."
+        );
+    }
 });
 
 app.MapGet("/health", () => Results.Ok(new

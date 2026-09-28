@@ -22,8 +22,7 @@ public class OpenAITextImprover : ITextImprover
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception(
-                $"OpenAI returned {(int)response.StatusCode}: {responseBody}");
+            throw new ExternalServiceException($"OpenAI returned {(int)response.StatusCode}");
         }
         using var json = JsonDocument.Parse(responseBody);
 
