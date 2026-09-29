@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TextStats.Api/TextStats.Api.csproj" />
+  <Project Path="TextStats.Tests/TextStats.Tests.csproj" />
+</Solution>
