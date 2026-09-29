@@ -3,14 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>TextStats</title>
+    <title></title>
 </head>
 
 <body>
-    <h1>TextStats</h1>
-    <h2>Improve your text</h2>
-    <textarea id="textInput" rows="8" cols="60" maxlength="2000" placeholder="Enter text to improve...">
-    </textarea>
+    <h1>TextPolish</h1>
+    <h2>Write it better before you send it</h2>
+    <textarea id="textInput" rows="8" cols="60" maxlength="2000" placeholder="Enter text to improve..."></textarea>
+    <div id="charCount">0 / 2000</div>
     <br>
     <button id="improveButton">
         Improve text
@@ -19,11 +19,20 @@
     <div id="result"></div>
     <script>
         const textInput = document.getElementById("textInput");
+        const charCount = document.getElementById("charCount");
         const improveButton = document.getElementById("improveButton");
         const result = document.getElementById("result");
 
+        textInput.addEventListener("input", () => {
+            charCount.textContent = `${textInput.value.length} / 2000`;
+        });
+
         improveButton.addEventListener("click", async () => {
-            const text = textInput.value;
+            const text = textInput.value.trim();
+            if (!text) {
+                result.textContent = "Please enter some text.";
+                return;
+            }
 
             improveButton.disabled = true;
             improveButton.textContent = "Improving...";
@@ -40,7 +49,19 @@
                         text: text
                     })
                 });
-
+                if (response.status === 400) {
+                    const errorData = await response.json();
+                    result.textContent = errorData.error;
+                    return;
+                }
+                if (response.status === 401) {
+                    result.textContent = "Unauthorized";
+                    return;
+                }
+                if (response.status === 502) {
+                    result.textContent = "Text improvement service is temporarily unavailable.";
+                    return;
+                }
                 if (!response.ok) {
                     throw new Error(`Request failed with status ${response.status}`);
                 }
