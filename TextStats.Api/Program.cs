@@ -1,7 +1,20 @@
+using Microsoft.AspNetCore.RateLimiting;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var textStatsApiKey = builder.Configuration["TEXTSTATS_API_KEY"]
     ?? throw new InvalidOperationException("TEXTSTATS_API_KEY is not configured.");
+
+builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.AddFixedWindowLimiter("improve", limiterOptions =>
+            {
+                limiterOptions.PermitLimit = 10;
+                limiterOptions.Window = TimeSpan.FromMinutes(1);
+                limiterOptions.QueueLimit = 0;
+            });
+    });
 
 builder.Services.AddScoped<ITextAnalyzer, TextAnalyzer>();
 
@@ -16,6 +29,7 @@ builder.Services.AddHttpClient<ITextImprover, OpenAITextImprover>(client =>
 });
 
 var app = builder.Build();
+app.UseRateLimiter();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -68,7 +82,7 @@ app.MapPost("/api/improve", async (
             title: "Text improvement service is temporarily unavailable."
         );
     }
-});
+}).RequireRateLimiting("improve");
 
 app.MapGet("/health", () => Results.Ok(new
 {
