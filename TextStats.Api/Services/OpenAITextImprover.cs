@@ -45,6 +45,5 @@ public class OpenAITextImprover : ITextImprover
 
         throw new InvalidOperationException(
             "OpenAI response did not contain output text.");
-
     }
 }

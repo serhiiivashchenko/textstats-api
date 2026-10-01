@@ -1,7 +1,25 @@
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+
 var builder = WebApplication.CreateBuilder(args);
 
-var textStatsApiKey = builder.Configuration["TEXTSTATS_API_KEY"] 
-    ?? throw new InvalidOperationException("TEXTSTATS_API_KEY is not configured.");
+builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.AddPolicy("improve", httpContext =>
+    {
+        var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ipAddress,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            });
+    });
+    });
 
 builder.Services.AddScoped<ITextAnalyzer, TextAnalyzer>();
 
@@ -16,6 +34,10 @@ builder.Services.AddHttpClient<ITextImprover, OpenAITextImprover>(client =>
 });
 
 var app = builder.Build();
+app.UseRateLimiter();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapPost("/api/analyze", (
     AnalyzeRequest request,
@@ -26,21 +48,9 @@ app.MapPost("/api/analyze", (
 });
 
 app.MapPost("/api/improve", async (
-    HttpRequest httpRequest,
     ImproveRequest request,
     ITextImprover improver) =>
 {
-    var providedApiKey = httpRequest.Headers["X-Api-Key"].FirstOrDefault();
-    if(providedApiKey!=textStatsApiKey) return Results.Unauthorized();
-
-    if (string.IsNullOrWhiteSpace(request.Text))
-        {
-        return Results.BadRequest(new
-        {
-            error = "Text must not be empty."
-        });
-    }
-
     if (request.Text.Length > 2000)
     {
         return Results.BadRequest(new
@@ -52,20 +62,20 @@ app.MapPost("/api/improve", async (
     try
     {
         var improved = await improver.ImproveTextAsync(request.Text);
-            return Results.Ok(new
-            {
-                original = request.Text,
-                improved
-            });
+        return Results.Ok(new
+        {
+            original = request.Text,
+            improved
+        });
     }
-    catch(ExternalServiceException)
+    catch (ExternalServiceException)
     {
         return Results.Problem(
             statusCode: StatusCodes.Status502BadGateway,
             title: "Text improvement service is temporarily unavailable."
         );
     }
-});
+}).RequireRateLimiting("improve");
 
 app.MapGet("/health", () => Results.Ok(new
 {

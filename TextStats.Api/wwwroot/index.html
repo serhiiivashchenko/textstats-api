@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+
+<body>
+    <h1>TextPolish</h1>
+    <h2>Write it better before you send it</h2>
+    <textarea id="textInput" rows="8" cols="60" maxlength="2000" placeholder="Enter text to improve..."></textarea>
+    <div id="charCount">0 / 2000</div>
+    <br>
+    <button id="improveButton">
+        Improve text
+    </button>
+    <h2>Improved text</h2>
+    <div id="result"></div>
+    <script>
+        const textInput = document.getElementById("textInput");
+        const charCount = document.getElementById("charCount");
+        const improveButton = document.getElementById("improveButton");
+        const result = document.getElementById("result");
+
+        textInput.addEventListener("input", () => {
+            charCount.textContent = `${textInput.value.length} / 2000`;
+        });
+
+        improveButton.addEventListener("click", async () => {
+            const text = textInput.value.trim();
+            if (!text) {
+                result.textContent = "Please enter some text.";
+                return;
+            }
+
+            improveButton.disabled = true;
+            improveButton.textContent = "Improving...";
+            result.textContent = "";
+
+            try {
+                const response = await fetch("/api/improve", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        text: text
+                    })
+                });
+                if (response.status === 400) {
+                    const errorData = await response.json();
+                    result.textContent = errorData.error;
+                    return;
+                }
+                if (response.status === 502) {
+                    result.textContent = "Text improvement service is temporarily unavailable.";
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+                const data = await response.json();
+                result.textContent = data.improved;
+            } catch (error) {
+                result.textContent = "We are having technical issues. Try again later.";
+            }
+            finally {
+                improveButton.disabled = false;
+                improveButton.textContent = "Improve text";
+            }
+        });
+    </script>
+</body>
+
+</html>
