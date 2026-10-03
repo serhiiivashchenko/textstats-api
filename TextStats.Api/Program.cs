@@ -51,6 +51,14 @@ app.MapPost("/api/improve", async (
     ImproveRequest request,
     ITextImprover improver) =>
 {
+    if (string.IsNullOrWhiteSpace(request.Text))
+
+    {
+        return Results.BadRequest(new
+        {
+            error = "Text must not be empty."
+        });
+    }
     if (request.Text.Length > 2000)
     {
         return Results.BadRequest(new
