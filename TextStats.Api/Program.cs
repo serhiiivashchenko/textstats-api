@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.RateLimiting;
+using MediatR;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,9 @@ builder.Services.AddHttpClient<ITextImprover, OpenAITextImprover>(client =>
         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
 });
 
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssemblyContaining<Program>());
+
 var app = builder.Build();
 app.UseRateLimiter();
 
@@ -49,7 +53,7 @@ app.MapPost("/api/analyze", (
 
 app.MapPost("/api/improve", async (
     ImproveRequest request,
-    ITextImprover improver) =>
+    IMediator mediator) =>
 {
     if (string.IsNullOrWhiteSpace(request.Text))
 
@@ -69,7 +73,7 @@ app.MapPost("/api/improve", async (
 
     try
     {
-        var improved = await improver.ImproveTextAsync(request.Text);
+        var improved = await mediator.Send(new ImproveTextCommand(request.Text));
         return Results.Ok(new
         {
             original = request.Text,
