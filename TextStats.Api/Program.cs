@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.RateLimiting;
 using MediatR;
 using System.Threading.RateLimiting;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,11 +34,15 @@ builder.Services.AddHttpClient<ITextImprover, OpenAITextImprover>(client =>
         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
 });
 
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 app.UseRateLimiter();
+app.UseExceptionHandler();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -54,24 +58,6 @@ app.MapPost("/api/analyze", (
 app.MapPost("/api/improve", async (
     ImproveRequest request,
     IMediator mediator) =>
-{
-    if (string.IsNullOrWhiteSpace(request.Text))
-
-    {
-        return Results.BadRequest(new
-        {
-            error = "Text must not be empty."
-        });
-    }
-    if (request.Text.Length > 2000)
-    {
-        return Results.BadRequest(new
-        {
-            error = $"Text must not exceed 2000 characters. Received: {request.Text.Length}."
-        });
-    }
-
-    try
     {
         var improved = await mediator.Send(new ImproveTextCommand(request.Text));
         return Results.Ok(new
@@ -79,15 +65,8 @@ app.MapPost("/api/improve", async (
             original = request.Text,
             improved
         });
-    }
-    catch (ExternalServiceException)
-    {
-        return Results.Problem(
-            statusCode: StatusCodes.Status502BadGateway,
-            title: "Text improvement service is temporarily unavailable."
-        );
-    }
-}).RequireRateLimiting("improve");
+
+    }).RequireRateLimiting("improve");
 
 app.MapGet("/health", () => Results.Ok(new
 {
