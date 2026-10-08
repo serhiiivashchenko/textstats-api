@@ -8,7 +8,7 @@ public class OpenAITextImprover : ITextImprover
     {
         _httpClient = httpClient;
     }
-    public async Task<string> ImproveTextAsync(string text)
+    public async Task<string> ImproveTextAsync(string text, CancellationToken cancellationToken)
     {
         var request = new
         {
