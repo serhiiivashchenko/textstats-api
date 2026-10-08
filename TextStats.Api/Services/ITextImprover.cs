@@ -1,4 +1,4 @@
 public interface ITextImprover
 {
-    Task<string> ImproveTextAsync(string text);
+    Task<string> ImproveTextAsync(string text, CancellationToken cancellationToken);
 }

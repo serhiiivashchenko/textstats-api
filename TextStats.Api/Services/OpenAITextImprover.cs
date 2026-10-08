@@ -8,7 +8,7 @@ public class OpenAITextImprover : ITextImprover
     {
         _httpClient = httpClient;
     }
-    public async Task<string> ImproveTextAsync(string text)
+    public async Task<string> ImproveTextAsync(string text, CancellationToken cancellationToken)
     {
         var request = new
         {
@@ -26,8 +26,8 @@ public class OpenAITextImprover : ITextImprover
             input = text
         };
 
-        var response = await _httpClient.PostAsJsonAsync("responses", request);
-        var responseBody = await response.Content.ReadAsStringAsync();
+        var response = await _httpClient.PostAsJsonAsync("responses", request, cancellationToken);
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

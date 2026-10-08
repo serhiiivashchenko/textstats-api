@@ -11,6 +11,6 @@ public class ImproveTextHandler
 
     public async Task<string> Handle(ImproveTextCommand request, CancellationToken cancellationToken)
     {
-        return await _textImprover.ImproveTextAsync(request.Text);
+        return await _textImprover.ImproveTextAsync(request.Text, cancellationToken);
     }
 }
