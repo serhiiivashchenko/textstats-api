@@ -9,8 +9,7 @@ builder.Services
     .AddOptions<OpenAISettings>()
     .Bind(builder.Configuration.GetSection("OpenAI"))
     .Validate(
-        settings => !string.IsNullOrWhiteSpace(settings.Model),
-        "OpenAI model must be configured.")
+        settings => !string.IsNullOrWhiteSpace(settings.Model), "OpenAI model must be configured.")
     .Validate(
         settings => Uri.TryCreate(settings.BaseAddress, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps,
         "OpenAI BaseAddress must be a valid HTTPS URL.")
@@ -41,14 +40,8 @@ builder.Services.AddScoped<ITextAnalyzer, TextAnalyzer>();
 builder.Services.AddHttpClient<ITextImprover, OpenAITextImprover>(
     (serviceProvider, client) =>
         {
-            var options = serviceProvider.GetRequiredService<IOptions<OpenAISettings>>();
-            var settings = options.Value;
-
             var apiKey = builder.Configuration["OPENAI_API_KEY"]
                 ?? throw new InvalidOperationException("OPENAI_API_KEY is not configured.");
-
-            client.BaseAddress = new Uri(settings.BaseAddress);
-            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
             client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
         });
