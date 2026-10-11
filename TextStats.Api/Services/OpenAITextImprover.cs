@@ -1,18 +1,20 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 public class OpenAITextImprover : ITextImprover
-
 {
     private readonly HttpClient _httpClient;
+    private readonly IOptions<OpenAISettings> _options;
 
-    public OpenAITextImprover(HttpClient httpClient)
+    public OpenAITextImprover(HttpClient httpClient, IOptions<OpenAISettings> options)
     {
         _httpClient = httpClient;
+        _options = options;
     }
     public async Task<string> ImproveTextAsync(string text, CancellationToken cancellationToken)
     {
         var request = new
         {
-            model = "gpt-5-nano",
+            model = _options.Value.Model,
             instructions = """
             Rewrite the user's text to improve grammar, clarity, and naturalness.
 
