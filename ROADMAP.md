@@ -14,6 +14,7 @@ to independent Backend Software Engineer.
 - [x] [PR #6](https://github.com/serhiiivashchenko/textstats-api/pull/6) — Validation & Exception Handling
 - [x] [PR #7](https://github.com/serhiiivashchenko/textstats-api/pull/7) — CancellationToken
 - [x] [PR #8](https://github.com/serhiiivashchenko/textstats-api/pull/8) — IOptions
+- [x] [PR #9](https://github.com/serhiiivashchenko/textstats-api/pull/9) — Engineering Roadmap & Learning Log
 
 ## Next
 
