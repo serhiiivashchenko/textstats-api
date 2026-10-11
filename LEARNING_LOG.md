@@ -97,6 +97,8 @@ automatically. It must be propagated.
 ## PR #8 — IOptions
 [View PR #8](https://github.com/serhiiivashchenko/textstats-api/pull/8)
 
+- [x] [PR #9](https://github.com/serhiiivashchenko/textstats-api/pull/9) — Engineering Roadmap & Learning Log
+
 Learned:
 - Configuration binding
 - Strongly typed configuration

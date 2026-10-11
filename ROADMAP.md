@@ -17,8 +17,8 @@ to independent Backend Software Engineer.
 
 ## Next
 
-- [ ] PR #9 — Refit
-- [ ] PR #10 — Swagger / OpenAPI
+- [ ] PR #10 — Refit
+- [ ] PR #11 — Swagger / OpenAPI
 - [ ] DDD: Entities, Value Objects, Aggregates
 - [ ] EF Core + PostgreSQL
 - [ ] Specification Pattern
