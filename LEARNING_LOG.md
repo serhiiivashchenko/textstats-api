@@ -107,3 +107,16 @@ Learned:
 Key insight:
 Tests must not depend on a developer's
 local environment variables.
+
+## PR #10 — Refit Integration
+
+### Key Insights
+
+**Application vs Infrastructure**
+Application defines what our application can do, without knowing about external providers.
+Infrastructure implements these capabilities using external services (e.g., OpenAI).
+Provider changes should ideally affect only Infrastructure, not Application.
+
+**Mental Model:**
+Application = WHAT we do.
+Infrastructure = HOW we do it using external services.

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Refit;
 
 public class OpenAITextImproverTests
 {
@@ -11,13 +12,16 @@ public class OpenAITextImproverTests
         {
             BaseAddress = new Uri("https://example.test/")
         };
+
+        var api = RestService.For<IOpenAiApi>(httpClient);
+
         var options = Options.Create(new OpenAISettings
         {
             Model = "gpt-5-nano"
         });
         using var cts = new CancellationTokenSource();
 
-        var improver = new OpenAITextImprover(httpClient, options);
+        var improver = new OpenAITextImprover(api, options);
 
         // Act
         var task = improver.ImproveTextAsync(
