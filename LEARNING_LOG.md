@@ -110,6 +110,13 @@ local environment variables.
 
 ## PR #10 — Refit Integration
 
+- Migrated OpenAI HTTP integration to Refit.
+- Separated application abstraction from infrastructure implementation.
+- Learned how Refit generates HTTP requests from interface definitions.
+- Implemented an HTTP contract test without real network calls.
+- Investigated HttpRequestMessage/HttpContent disposal.
+- Learned to verify serialized JSON contracts independently of DTOs.
+
 ### Key Insights
 
 **Application vs Infrastructure**
