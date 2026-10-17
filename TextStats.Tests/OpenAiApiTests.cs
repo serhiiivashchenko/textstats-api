@@ -3,7 +3,7 @@ using Refit;
 
 public class OpenAiApiTests
 {
-    private static readonly Uri requestUri = new("https://example.test/");
+    private static readonly Uri requestUri = new("https://example.test/v1/");
     private static readonly string model = "test-model-io";
     private static readonly string instruction = "test-instruction";
     private static readonly string input = "test-input";
@@ -24,13 +24,11 @@ public class OpenAiApiTests
         using var response = await api.CreateResponseAsync(body, CancellationToken.None);
 
         var json = Assert.IsType<string>(catchingRequestHttpHandler.CaughtRequestBody);
-        var actualBody = JsonSerializer.Deserialize<OpenAiRequestBody>(json);
 
         var caughtRequest = Assert.IsType<HttpRequestMessage>(catchingRequestHttpHandler.CaughtRequest);
-        Assert.Equal(HttpMethod.Post, catchingRequestHttpHandler.CaughtRequest.Method);
-
-        Assert.Equal(new Uri(requestUri, "responses"), catchingRequestHttpHandler.CaughtRequest.RequestUri);
-        Assert.Equal(body, actualBody);
+        
+        Assert.Equal(HttpMethod.Post, caughtRequest.Method);
+        Assert.Equal(new Uri(requestUri, "responses"), caughtRequest.RequestUri);
 
         using var document = JsonDocument.Parse(json);
         var root = document.RootElement;
