@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +40,14 @@ builder.Services.AddRateLimiter(options =>
     });
 
 builder.Services.AddScoped<ITextAnalyzer, TextAnalyzer>();
+builder.Services.AddScoped<ITextImprover, OpenAITextImprover>();
 
-builder.Services.AddHttpClient<ITextImprover, OpenAITextImprover>(
-    (serviceProvider, client) =>
+builder.Services
+    .AddRefitClient<IOpenAiApi>()
+    .ConfigureHttpClient(
+        (serviceProvider, client) =>
         {
             var settings = serviceProvider.GetRequiredService<IOptions<OpenAISettings>>().Value;
-
             client.BaseAddress = new Uri(settings.BaseAddress);
             client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);

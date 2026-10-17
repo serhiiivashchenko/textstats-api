@@ -2,20 +2,20 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 public class OpenAITextImprover : ITextImprover
 {
-    private readonly HttpClient _httpClient;
+    private readonly IOpenAiApi _openAiApi;
     private readonly IOptions<OpenAISettings> _options;
 
-    public OpenAITextImprover(HttpClient httpClient, IOptions<OpenAISettings> options)
+    public OpenAITextImprover(IOpenAiApi openAiApi, IOptions<OpenAISettings> options)
     {
-        _httpClient = httpClient;
+        _openAiApi = openAiApi;
         _options = options;
     }
     public async Task<string> ImproveTextAsync(string text, CancellationToken cancellationToken)
     {
-        var request = new
-        {
-            model = _options.Value.Model,
-            instructions = """
+        var request = new OpenAiRequestBody
+        (
+            Model: _options.Value.Model,
+            Instructions: """
             Rewrite the user's text to improve grammar, clarity, and naturalness.
 
             Rules:
@@ -25,10 +25,10 @@ public class OpenAITextImprover : ITextImprover
             - Do not add new information or ideas.
             - Return only the rewritten text, with no explanation or commentary.
             """,
-            input = text
-        };
+            Input: text
+        );
 
-        var response = await _httpClient.PostAsJsonAsync("responses", request, cancellationToken);
+        using var response = await _openAiApi.CreateResponseAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
@@ -54,7 +54,6 @@ public class OpenAITextImprover : ITextImprover
             }
         }
 
-        throw new InvalidOperationException(
-            "OpenAI response did not contain output text.");
+        throw new InvalidOperationException("OpenAI response did not contain output text.");
     }
 }

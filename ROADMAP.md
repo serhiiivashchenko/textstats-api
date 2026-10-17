@@ -15,6 +15,8 @@ to independent Backend Software Engineer.
 - [x] [PR #7](https://github.com/serhiiivashchenko/textstats-api/pull/7) — CancellationToken
 - [x] [PR #8](https://github.com/serhiiivashchenko/textstats-api/pull/8) — IOptions
 - [x] [PR #9](https://github.com/serhiiivashchenko/textstats-api/pull/9) — Engineering Roadmap & Learning Log
+- [x] [PR #10](https://github.com/serhiiivashchenko/textstats-api/pull/10) — Refit integration
+- [ ] [PR #11](WIP) - Swagger / OpenAPI
 
 ## Next
 
@@ -59,4 +61,4 @@ to independent Backend Software Engineer.
 
 ## Current Focus
 
-PR #9 — Refit
+Swagger / OpenAPI — PR #11
