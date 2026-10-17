@@ -9,6 +9,7 @@ services:
       ASPNETCORE_ENVIRONMENT: E2E
       OpenAI__BaseAddress: http://wiremock:8080
       OpenAI__ApiKey: e2e-dummy-key
+      E2E_BASE_URL: http://api:8080
     depends_on:
       wiremock:
         condition: service_healthy
