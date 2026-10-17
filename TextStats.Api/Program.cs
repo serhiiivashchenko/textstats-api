@@ -43,7 +43,7 @@ builder.Services.AddScoped<ITextAnalyzer, TextAnalyzer>();
 builder.Services.AddScoped<ITextImprover, OpenAITextImprover>();
 
 builder.Services
-    .AddRefitClient<IOpenAiApi>()
+    .AddRefitGeneratedClient<IOpenAiApi>()
     .ConfigureHttpClient(
         (serviceProvider, client) =>
         {
