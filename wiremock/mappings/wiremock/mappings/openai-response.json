@@ -1,6 +1,6 @@
 {
   "request": {
-    "urlPath": "/responses",
+    "urlPath": "/v1/responses",
     "method": "POST"
   },
   "response": {

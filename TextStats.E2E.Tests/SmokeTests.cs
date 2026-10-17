@@ -6,6 +6,7 @@ public class SmokeTests : IAsyncLifetime
     private IPlaywright _playwright = null!;
     private IBrowser _browser = null!;
     private IPage _page = null!;
+
     public async Task InitializeAsync()
     {
         _playwright = await Playwright.CreateAsync();
