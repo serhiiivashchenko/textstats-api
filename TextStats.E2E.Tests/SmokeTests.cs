@@ -13,7 +13,7 @@ public class SmokeTests : IAsyncLifetime
         _browser = await _playwright.Chromium.LaunchAsync(
             new BrowserTypeLaunchOptions
             {
-                Headless = false//true
+                Headless = true
             });
         _page = await _browser.NewPageAsync();
     }
