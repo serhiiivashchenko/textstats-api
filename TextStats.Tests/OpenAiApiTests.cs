@@ -13,23 +13,30 @@ public class OpenAiApiTests
     {
         // Arrange
         using var catchingRequestHttpHandler = new CatchingRequestHttpHandler();
-        using var httpClient = new HttpClient(catchingRequestHttpHandler)
-        {
-            BaseAddress = requestUri
-        };
+
+        using var httpClient = new HttpClient(catchingRequestHttpHandler);
+        httpClient.BaseAddress = requestUri;
 
         var api = RestService.For<IOpenAiApi>(httpClient);
 
         var body = new OpenAiRequestBody(Model: model, Instructions: instruction, Input: input);
 
         using var response = await api.CreateResponseAsync(body, CancellationToken.None);
-        var json = await catchingRequestHttpHandler.CaughtRequest.Content.ReadAsStringAsync();
 
+        var json = Assert.IsType<string>(catchingRequestHttpHandler.CaughtRequestBody);
         var actualBody = JsonSerializer.Deserialize<OpenAiRequestBody>(json);
 
-
+        var caughtRequest = Assert.IsType<HttpRequestMessage>(catchingRequestHttpHandler.CaughtRequest);
         Assert.Equal(HttpMethod.Post, catchingRequestHttpHandler.CaughtRequest.Method);
-        Assert.Equal(requestUri.AbsolutePath + "responses", catchingRequestHttpHandler.CaughtRequest.RequestUri.AbsoluteUri);
+
+        Assert.Equal(new Uri(requestUri, "responses"), catchingRequestHttpHandler.CaughtRequest.RequestUri);
         Assert.Equal(body, actualBody);
+
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+
+        Assert.Equal(model, root.GetProperty("model").GetString());
+        Assert.Equal(instruction, root.GetProperty("instructions").GetString());
+        Assert.Equal(input, root.GetProperty("input").GetString());
     }
 }
