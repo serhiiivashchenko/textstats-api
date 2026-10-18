@@ -15,8 +15,9 @@ builder.Services
         .Validate(
             settings => !string.IsNullOrWhiteSpace(settings.ApiKey), "OpenAI ApiKey must be configured.")
         .Validate(
-            settings => Uri.TryCreate(settings.BaseAddress, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps,
-            "OpenAI BaseAddress must be a valid HTTPS URL.")
+            settings => Uri.TryCreate(settings.BaseAddress, UriKind.Absolute, out var uri)
+                && (uri.Scheme == Uri.UriSchemeHttps
+                    || (builder.Environment.IsEnvironment("E2E") && uri.Scheme == Uri.UriSchemeHttp)))
         .Validate(
             settings => settings.TimeoutSeconds > 0 && settings.TimeoutSeconds <= 60, "Timeout must be configured and not exceed 60 seconds")
     .ValidateOnStart();
