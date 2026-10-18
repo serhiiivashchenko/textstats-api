@@ -1,0 +1,21 @@
+name: E2E Tests
+
+on:
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run containerized E2E
+        run: |
+          docker compose up --build --abort-on-container-exit --exit-code-from e2e
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down --remove-orphans
