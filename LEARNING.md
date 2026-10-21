@@ -20,10 +20,10 @@ understanding software engineering concepts through practice.
 | Docker Compose | Networking, dependencies, health checks |
 | WireMock | External API mocking |
 | GitHub Actions | Containerized E2E pipeline |
+| OpenAPI / Swagger UI | API contracts, endpoint metadata, TypedResults, response DTOs, ProblemDetails, environment-specific exposure |
 
 ## Next Sessions
 
-- [ ] Swagger / OpenAPI
 - [ ] DDD: Entities, Value Objects, Aggregates
 - [ ] EF Core + PostgreSQL
 - [ ] Database migrations
