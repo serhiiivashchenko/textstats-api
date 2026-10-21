@@ -59,8 +59,17 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "TextPolish API v1");
+    });
+}
 app.UseRateLimiter();
 app.UseExceptionHandler();
 
@@ -80,13 +89,16 @@ app.MapPost("/api/improve", async (
     IMediator mediator) =>
     {
         var improved = await mediator.Send(new ImproveTextCommand(request.Text));
-        return Results.Ok(new
-        {
-            original = request.Text,
-            improved
-        });
-
-    }).RequireRateLimiting("improve");
+        return TypedResults.Ok(new ImproveResponse
+        (
+            Original: request.Text,
+            Improved: improved
+        ));
+    }).RequireRateLimiting("improve")
+    .Produces(StatusCodes.Status429TooManyRequests)
+    .ProducesProblem(StatusCodes.Status400BadRequest)
+    .ProducesProblem(StatusCodes.Status502BadGateway)
+    .ProducesProblem(StatusCodes.Status500InternalServerError);
 
 app.MapGet("/health", () => Results.Ok(new
 {
@@ -99,6 +111,7 @@ app.Run();
 
 record AnalyzeRequest(string Text);
 record ImproveRequest(string Text);
+record ImproveResponse(string Original, string Improved);
 
 public record AnalyzeResponse(
     int Characters,

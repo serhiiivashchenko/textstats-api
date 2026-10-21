@@ -62,6 +62,8 @@ public class ImproveEndpointTests
     [Fact]
     public async Task Improve_WhenImproverFails_ReturnsBadGateway()
     {
+        var expectedTitle = "Text improvement service is temporarily unavailable.";
+
         await using var factory = new CustomWebApplicationFactory();
 
         var client = factory.WithWebHostBuilder(builder =>
@@ -81,6 +83,13 @@ public class ImproveEndpointTests
             });
 
         Assert.Equal(HttpStatusCode.BadGateway, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+
+        var serviceResponse = await response.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>();
+        Assert.NotNull(serviceResponse);
+
+        Assert.Equal(expectedTitle, serviceResponse.Title);
+        Assert.Equal((int)HttpStatusCode.BadGateway, serviceResponse.Status);
     }
 }
 
