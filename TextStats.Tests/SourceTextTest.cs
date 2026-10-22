@@ -1,7 +1,7 @@
 public class SourceTextTest
 {
     [Fact]
-    public void Constructor_WithValidText_CreatesDocumentText()
+    public void Constructor_WithValidText_CreatesSourceText()
     {
         // Arrange
         var value = "Hello World";
