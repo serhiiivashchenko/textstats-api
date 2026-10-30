@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 
 public class EfCoreLearningTests
 {
@@ -43,12 +45,14 @@ public class EfCoreLearningTests
     public async Task SaveChangesAsync_PersistsAddedEntity()
     {
         // Arrange
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("Data Source=:memory:")
+            .UseSqlite(connection)
             .Options;
 
         using var context = new AppDbContext(options);
-        await context.Database.OpenConnectionAsync();
         await context.Database.EnsureCreatedAsync();
 
         // Act
@@ -56,13 +60,50 @@ public class EfCoreLearningTests
         context.Notes.Add(note);
         await context.SaveChangesAsync();
 
-        var savedNote = await context.Notes
+        using var readContext = new AppDbContext(options);
+
+        var savedNote = await readContext.Notes
             .AsNoTracking()
             .SingleAsync();
 
         // Assert
         Assert.Equal(EntityState.Unchanged, context.Entry(note).State);
+        Assert.True(note.Id > 0);
         Assert.Equal(note.Id, savedNote.Id);
         Assert.Equal(note.Text, savedNote.Text);
+    }
+
+    [Fact]
+    public async Task UpdateTrackedEntity_PersistsChanges()
+    {
+        // Arrange
+        var newText = "Updated text!";
+
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .LogTo(Console.WriteLine, LogLevel.Information)
+            .Options;
+
+        using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+        var note = new Note { Text = "Original text" };
+        context.Notes.Add(note);
+        await context.SaveChangesAsync();
+
+        // Act
+        note.Text = newText;
+        await context.SaveChangesAsync();
+
+        using var readContext = new AppDbContext(options);
+        var savedNote = await readContext.Notes
+            .AsNoTracking()
+            .SingleAsync();
+
+        // Assert
+        Assert.Equal(EntityState.Unchanged, context.Entry(note).State);
+        Assert.Equal(newText, savedNote.Text);
     }
 }
