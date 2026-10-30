@@ -17,7 +17,7 @@ public sealed class TextDocument
     {
         if (string.IsNullOrWhiteSpace(improvedText))
         {
-            throw new InvalidOperationException($"Improved text can't be empty.");
+            throw new ArgumentException($"Improved text can't be empty.");
         }
         if (Status != DocumentStatus.Draft)
         {
