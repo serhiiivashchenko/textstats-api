@@ -4,7 +4,7 @@ public class EfCoreLearningTests
 {
 
     [Fact]
-    public void ModifyTrackedEntity_ChangesStateToModified()
+    public void AddingEntity_ChangesStateToAdded()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite("Data Source=:memory:")
@@ -56,7 +56,13 @@ public class EfCoreLearningTests
         context.Notes.Add(note);
         await context.SaveChangesAsync();
 
+        var savedNote = await context.Notes
+            .AsNoTracking()
+            .SingleAsync();
+
         // Assert
         Assert.Equal(EntityState.Unchanged, context.Entry(note).State);
+        Assert.Equal(note.Id, savedNote.Id);
+        Assert.Equal(note.Text, savedNote.Text);
     }
 }
