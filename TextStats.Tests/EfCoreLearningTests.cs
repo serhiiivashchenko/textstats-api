@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
+using Npgsql;
+using Microsoft.Extensions.Configuration;
 
 public class EfCoreLearningTests
 {
@@ -105,5 +107,34 @@ public class EfCoreLearningTests
         // Assert
         Assert.Equal(EntityState.Unchanged, context.Entry(note).State);
         Assert.Equal(newText, savedNote.Text);
+    }
+
+    [Fact]
+    public async Task TextDocument_CanBePersistedAndRestored()
+    {
+        var textToImprove = "Hello EF Core!";
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        var document = new TextDocument(new SourceText(textToImprove));
+
+        using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+        context.TextDocuments.Add(document);
+        await context.SaveChangesAsync();
+
+        using var readContext = new AppDbContext(options);
+        var savedTextDocument = await readContext.TextDocuments
+            .AsNoTracking()
+            .SingleAsync();
+
+        Assert.Equal(textToImprove, savedTextDocument.OriginalText.Value);
+        Assert.Equal(document.Id, savedTextDocument.Id);
+        Assert.Null(savedTextDocument.ImprovedText);
+        Assert.Equal(DocumentStatus.Draft, savedTextDocument.Status);
     }
 }

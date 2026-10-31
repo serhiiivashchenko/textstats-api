@@ -4,8 +4,16 @@ using FluentValidation;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using Refit;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("TextPolish");
+
+if (!string.IsNullOrWhiteSpace(connectionString))
+{
+    builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+}
 
 builder.Services
     .AddOptions<OpenAISettings>()

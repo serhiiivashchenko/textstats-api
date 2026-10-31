@@ -21,17 +21,17 @@ understanding software engineering concepts through practice.
 | WireMock | External API mocking |
 | GitHub Actions | Containerized E2E pipeline |
 | OpenAPI / Swagger UI | API contracts, endpoint metadata, TypedResults, response DTOs, ProblemDetails, environment-specific exposure |
+| DDD | Entities, Value Objects, Aggregates, domain invariants |
+| EF Core + PostgreSQL | DbContext, Change Tracking, Value Converters, persistence |
+| Database Migrations | Model Snapshot, Up/Down, migration history, schema evolution |
 
 ## Next Sessions
 
-- [ ] DDD: Entities, Value Objects, Aggregates
-- [ ] EF Core + PostgreSQL
-- [ ] Database migrations
+- [ ] Transactional Outbox
 - [ ] Specification Pattern
 - [ ] Decorator Pattern
 - [ ] RabbitMQ fundamentals
 - [ ] MassTransit
-- [ ] Transactional Outbox
 - [ ] Structured Logging & Observability
 - [ ] Resilience Patterns
 

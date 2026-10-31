@@ -5,6 +5,10 @@ public sealed class TextDocument
     public DocumentStatus Status { get; private set; }
     public string? ImprovedText { get; private set; }
 
+    private TextDocument()
+    {
+        OriginalText = null!;
+    }
     public TextDocument(SourceText originalText)
     {
         ArgumentNullException.ThrowIfNull(originalText);
