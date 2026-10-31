@@ -8,6 +8,13 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Note> Notes => Set<Note>();
+    public DbSet<TextDocument> TextDocuments => Set<TextDocument>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfiguration(new TextDocumentConfiguration());
+    }
 }
 
 public class Note
