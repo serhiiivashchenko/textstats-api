@@ -88,7 +88,14 @@ app.MapPost("/api/analyze", (
     AnalyzeRequest request,
     ITextAnalyzer analyzer) =>
 {
-    return analyzer.Analyze(request.Text);
+    if (request.Text is null)
+    {
+        return Results.Problem(
+            statusCode: StatusCodes.Status400BadRequest,
+            title: "Text is required.");
+    }
+
+    return Results.Ok(analyzer.Analyze(request.Text));
 
 });
 
